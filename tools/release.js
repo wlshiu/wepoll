@@ -21,8 +21,12 @@ stdout = exec('git.exe status --porcelain -uno', utf8);
 if (stdout.match(/\S/))
   throw new Error('git index or working directory not clean');
 
-exec('cmake.exe --build . --target dist', inherit);
+exec(`cmake.exe . -DRELEASE_VERSION=${version}`);
 
+exec('cmake.exe --build . --clean-first --target dist', inherit);
+
+exec('cmake.exe . -URELEASE_VERSION');
+return;
 stdout = exec('git rev-parse --verify HEAD', utf8);
 const sourceCommit = getSHA(stdout);
 

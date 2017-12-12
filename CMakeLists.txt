@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.0)
 project(wepoll)
 
+if(NOT RELEASE_VERSION)
+  set(RELEASE_VERSION none STRING)
+endif(NOT RELEASE_VERSION)
+
 link_libraries(ws2_32)
 
 if(MSVC)
@@ -53,13 +57,21 @@ foreach(HEADER_SOURCE ${SOURCES_INCLUDE})
   set(DIST_README "dist/README.md")
   add_custom_command(
     OUTPUT ${DIST_SRC_C}
-    COMMAND node tools/combine.js -Iinclude -Isrc -Isrc/combined --strip-guards ${HEADER_SOURCE} ${SOURCES_SRC_C} > ${DIST_SRC_C}
+    COMMAND node tools/combine.js
+            -Iinclude -Isrc -Isrc/combined
+            --release-version=${RELEASE_VERSION}
+            --strip-guards
+            src/combined/version.h ${HEADER_SOURCE} ${SOURCES_SRC_C}
+            > ${DIST_SRC_C}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     IMPLICIT_DEPENDS c ${SOURCES_INCLUDE} ${SOURCES_SRC} ${SOURCES_SRC_COMBINED}
   )
   add_custom_command(
     OUTPUT ${DIST_SRC_H}
-    COMMAND node tools/combine.js ${HEADER_SOURCE} > ${DIST_SRC_H}
+    COMMAND node tools/combine.js
+            --release-version=${RELEASE_VERSION}
+            src/combined/version.h ${HEADER_SOURCE}
+            > ${DIST_SRC_H}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     IMPLICIT_DEPENDS c ${SOURCES_INCLUDE}
   )

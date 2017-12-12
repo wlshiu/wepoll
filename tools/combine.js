@@ -8,6 +8,8 @@ const fs = require('fs');
 const files = [];
 const includeDirs = [];
 let stripGuardsEnabled = false;
+let releaseVersion = 'none';
+const releaseDate = (new Date()).toISOString().replace(/T.*/, '');
 
 process.argv
   .slice(2)
@@ -15,6 +17,8 @@ process.argv
     let match;
     if ((match = /^-I(.*)$/.exec(arg)))
       includeDirs.push(match[1]);
+    else if ((match = /^--release-version=["']?([\.\w]+)["']?/.exec(arg)))
+      releaseVersion = match[1];
     else if (arg === '--strip-guards')
       stripGuardsEnabled = true;
     else
@@ -143,6 +147,8 @@ restart: for (let lno = 0; lno < source.length;) {
 source = source
   .map((line) => line.replace(/\s+$/, ''))
   .join('\n')
+  .replace('${RELEASE_VERSION}', releaseVersion)
+  .replace('${RELEASE_DATE}', releaseDate)
   .replace(/\n{3,}/g, '\n\n')
   .replace(/\n*$/, '\n');
 
